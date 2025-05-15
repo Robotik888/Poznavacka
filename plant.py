@@ -1,7 +1,6 @@
 from enum import Enum
 import random
 
-# class syntax
 class Answer(Enum):
     CORRECT = 1
     FIRST_CORRECT = 2

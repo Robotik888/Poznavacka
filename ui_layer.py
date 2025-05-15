@@ -5,7 +5,7 @@ from screeninfo import get_monitors
 from PIL import Image, ImageTk
 
 
-from business_logic import save_plant_objects, get_files
+from data_manager import DataManager
 from constants import PICTURES_DIR
 from plant import Plant, Answer
 from utils import PlantProvider, find_screen_native
@@ -48,7 +48,7 @@ class UIManager:
 
         # button for loading files
         load_button = tk.Button(buttons_frame, text="Load Plants", bg="light goldenrod", font=("Arial", 20),
-                           command=lambda: get_files(self.plant_provider), height=10, width=20)
+                                command=lambda: self.data_manager.add_new_plants(self.plant_provider), height=10, width=20)
         load_button.grid(row=1, column=1)
 
         # button for viewing and deleting plants
@@ -77,11 +77,12 @@ class UIManager:
         self.setup_quiz_frame()
 
 
-    def __init__(self, plant_provider: PlantProvider):
+    def __init__(self, plant_provider: PlantProvider, data_manager: DataManager):
 
         self.images = []
         self.image_labels = []
         self.plant_provider = plant_provider
+        self.data_manager = data_manager
 
         # sizes
         self.width, self.height = find_screen_native()
@@ -132,7 +133,7 @@ class UIManager:
         self.confirm_button.config(state="disabled")
         result = AnswerChecker.checkAnswer(self.entry.get(), self.plant_provider.current_plant)
         self.plant_provider.current_plant.add_answer(result)
-        save_plant_objects(self.plant_provider.plant_list)
+        self.data_manager.save_plant_objects(self.plant_provider.plant_list)
         if result == Answer.CORRECT:
             self.image_frame.config(bg="green")
         elif result == Answer.INCORRECT:
@@ -239,7 +240,7 @@ class UIManager:
 
             # delete from database
             self.plant_provider.plant_list = [p for p in self.plant_provider.plant_list if p.name != plant_name]
-            save_plant_objects(self.plant_provider.plant_list)
+            self.data_manager.save_plant_objects(self.plant_provider.plant_list)
 
             # delete from table
             self.tree.delete(item_id)
