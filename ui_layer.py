@@ -1,14 +1,9 @@
 import tkinter as tk
 import os
-import json
-import re
 from tkinter import ttk
-import random
-from collections import defaultdict
-import shutil
 from screeninfo import get_monitors
 from PIL import Image, ImageTk
-from tkinter import filedialog
+
 
 from business_logic import save_plant_objects, get_files
 from constants import PICTURES_DIR
@@ -27,19 +22,23 @@ class UIManager:
                 return monitor.width, monitor.height
         return 1920, 1080
 
+    def create_base_ui_structure(self):
+        print("hello")
+
 
     def __init__(self, plant_provider: PlantProvider):
+
         self.images = []
         self.image_labels = []
-        self.current_plant = None
         self.plant_provider = plant_provider
+
         width, height = UIManager.find_screen_native()
         size_divider = 2.7
         self.image_frame_width = width // size_divider
         self.image_frame_height = height // size_divider
 
         self.root = tk.Tk()
-        #self.root.iconbitmap("phyton_app_shrubs.ico")
+        self.root.iconbitmap("phyton_app_shrubs.ico")
         self.root.configure(bg="white")
         self.root.title("Poznavacka")
         self.root.geometry(str(width) + "x" + str(height))
@@ -123,8 +122,8 @@ class UIManager:
         self.menu_frame.tkraise()
     def evaluate_answer(self):
         self.confirm_button.config(state="disabled")
-        result = AnswerChecker.checkAnswer(self.entry.get(), self.current_plant)
-        self.current_plant.add_answer(result)
+        result = AnswerChecker.checkAnswer(self.entry.get(), self.plant_provider.current_plant)
+        self.plant_provider.current_plant.add_answer(result)
         save_plant_objects(self.plant_provider.plant_list)
         if result == Answer.CORRECT:
             self.image_frame.config(bg="green")
@@ -135,11 +134,11 @@ class UIManager:
         self.show_score()
 
     def show_score(self):
-        self.label_result.config(text=self.current_plant.name)
-        self.label_correct.config(text="Correct Answers: " + str(self.current_plant.answers.count(Answer.CORRECT)))
-        self.label_first_correct.config(text="Correct Genus: " + str(self.current_plant.answers.count(Answer.FIRST_CORRECT)))
-        self.label_second_correct.config(text="Correct Species: " + str(self.current_plant.answers.count(Answer.SECOND_CORRECT)))
-        self.label_incorrect.config(text="Incorrect Answers: " + str(self.current_plant.answers.count(Answer.INCORRECT)))
+        self.label_result.config(text=self.plant_provider.current_plant.name)
+        self.label_correct.config(text="Correct Answers: " + str(self.plant_provider.current_plant.answers.count(Answer.CORRECT)))
+        self.label_first_correct.config(text="Correct Genus: " + str(self.plant_provider.current_plant.answers.count(Answer.FIRST_CORRECT)))
+        self.label_second_correct.config(text="Correct Species: " + str(self.plant_provider.current_plant.answers.count(Answer.SECOND_CORRECT)))
+        self.label_incorrect.config(text="Incorrect Answers: " + str(self.plant_provider.current_plant.answers.count(Answer.INCORRECT)))
 
 
     def get_image_size(self):
@@ -162,8 +161,8 @@ class UIManager:
         self.image_frame.config(bg="PaleTurquoise1")
         self.entry.delete(0, tk.END)
         self.quiz_frame.tkraise()
-        self.current_plant = self.plant_provider.provide_plant_for_quiz()
-        image_paths = [os.path.join(PICTURES_DIR, path) for path in self.current_plant.pick_random_images()]
+        self.plant_provider.choose_new_plant()
+        image_paths = [os.path.join(PICTURES_DIR, path) for path in self.plant_provider.current_plant.pick_random_images()]
         print(image_paths)
         self.images = []
         self.image_labels = []

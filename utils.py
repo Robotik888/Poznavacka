@@ -32,19 +32,18 @@ class AnswerChecker:
 class PlantProvider:
     def __init__(self):
         self.plant_list = []
-
-
+        self.current_plant = None
 
     def get_plants(self):
         return self.plant_list
 
-
-
+    def get_current_plant(self):
+        return self.current_plant
 
     def write_new_plants(self, new_plants):
         self.plant_list = new_plants
 
 
-    def provide_plant_for_quiz(self):
-        return random.choice(self.plant_list)
+    def choose_new_plant(self):
+        self.current_plant = random.choice(self.plant_list)
 
