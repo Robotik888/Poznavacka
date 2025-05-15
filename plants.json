@@ -25,7 +25,8 @@
       "CORRECT",
       "INCORRECT",
       "INCORRECT",
-      "INCORRECT"
+      "INCORRECT",
+      "FIRST_CORRECT"
     ]
   },
   {
@@ -36,7 +37,8 @@
     "answers": [
       "SECOND_CORRECT",
       "SECOND_CORRECT",
-      "INCORRECT"
+      "INCORRECT",
+      "CORRECT"
     ]
   },
   {
@@ -57,6 +59,8 @@
       "Aesculus parviflora (3).jpg",
       "Aesculus parviflora (4).jpg"
     ],
-    "answers": []
+    "answers": [
+      "INCORRECT"
+    ]
   }
 ]

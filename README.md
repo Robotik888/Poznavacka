@@ -13,3 +13,9 @@ Pictures need to be named in this format:
     .
 
 File name needs to contain parentheses with number.
+
+![Good](md_images/Good.png)
+![Mid](md_images/Mid.png)
+![Bad](md_images/Bad.png)
+![PlantTable](md_images/PlantTable.png)
+![Menu](md_images/Menu.png)
