@@ -22,7 +22,9 @@
     ],
     "answers": [
       "INCORRECT",
-      "CORRECT"
+      "CORRECT",
+      "INCORRECT",
+      "INCORRECT"
     ]
   },
   {
@@ -32,7 +34,18 @@
     ],
     "answers": [
       "SECOND_CORRECT",
-      "SECOND_CORRECT"
+      "SECOND_CORRECT",
+      "INCORRECT"
     ]
+  },
+  {
+    "name": "Actinidia kolomikta",
+    "images": [
+      "Actinidia kolomikta (1).jpg",
+      "Actinidia kolomikta (2).jpg",
+      "Actinidia kolomikta (3).jpg",
+      "Actinidia kolomikta (5).jpg"
+    ],
+    "answers": []
   }
 ]

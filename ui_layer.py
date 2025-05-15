@@ -8,22 +8,73 @@ from PIL import Image, ImageTk
 from business_logic import save_plant_objects, get_files
 from constants import PICTURES_DIR
 from plant import Plant, Answer
-from utils import PlantProvider
+from utils import PlantProvider, find_screen_native
 from utils import AnswerChecker
 
 
 class UIManager:
 
-    @staticmethod
-    def find_screen_native():
-        # Find main screen resolution
-        for monitor in get_monitors():
-            if monitor.is_primary:
-                return monitor.width, monitor.height
-        return 1920, 1080
+    def setup_quiz_frame(self):
+
+        # going back to main menu
+        back_frame = tk.Frame(self.quiz_frame, bg="white")
+        back_frame.pack()
+
+        go_back_quiz_button = tk.Button(back_frame, text="Back to Menu", bg="light goldenrod",
+                                        font=("Arial", 12),
+                                        command=self.return_to_menu)
+        go_back_quiz_button.pack()
+
+        # frame for images
+
+        self.image_frame.pack(pady=20)
+        self.entry.grid(row=0, column=0, padx=10)
+        self.confirm_button.grid(row=0, column=1, padx=10)
+        self.next_button.grid(row=0, column=2, padx=10)
+
+        # labels
+        self.label_correct.grid(row=0, column=3, padx=10)
+        self.label_first_correct.grid(row=0, column=4, padx=10)
+        self.label_second_correct.grid(row=0, column=5, padx=10)
+        self.label_incorrect.grid(row=0, column=6, padx=10)
+        self.label_result.grid(row=1, column=0, padx=10)
+
+    def setup_menu_frame(self):
+        buttons_frame = tk.Frame(self.menu_frame, bg="green")
+        buttons_frame.pack(pady=80)
+        quiz_button = tk.Button(buttons_frame, text="Start Quiz", bg="lightgreen", font=("Arial", 20),
+                                command=lambda: self.fill_image_frame(), height=10, width=20)
+        quiz_button.grid(row=0, column=1)
+
+        # button for loading files
+        load_button = tk.Button(buttons_frame, text="Load Plants", bg="light goldenrod", font=("Arial", 20),
+                           command=lambda: get_files(self.plant_provider), height=10, width=20)
+        load_button.grid(row=1, column=1)
+
+        # button for viewing and deleting plants
+        delete_button = tk.Button(buttons_frame, text="Show All", bg="lightcoral", font=("Arial", 20),
+                                  command=self.show_plants,
+                                  height=10, width=20)
+        delete_button.grid(row=2, column=1)
 
     def create_base_ui_structure(self):
-        print("hello")
+        # root configuration
+        self.root.iconbitmap("phyton_app_shrubs.ico")
+        self.root.configure(bg="white")
+        self.root.title("Poznavacka")
+        self.root.geometry(str(self.width) + "x" + str(self.height))
+
+        # container configuration
+        self.container.pack(fill="both", expand=True)
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+
+        # main frames setup
+        for frame in (self.menu_frame, self.quiz_frame, self.summary_frame):
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.setup_menu_frame()
+        self.setup_quiz_frame()
 
 
     def __init__(self, plant_provider: PlantProvider):
@@ -32,94 +83,51 @@ class UIManager:
         self.image_labels = []
         self.plant_provider = plant_provider
 
-        width, height = UIManager.find_screen_native()
+        # sizes
+        self.width, self.height = find_screen_native()
         size_divider = 2.7
-        self.image_frame_width = width // size_divider
-        self.image_frame_height = height // size_divider
+        self.image_frame_width = self.width // size_divider
+        self.image_frame_height = self.height // size_divider
 
+        # main window
         self.root = tk.Tk()
-        self.root.iconbitmap("phyton_app_shrubs.ico")
-        self.root.configure(bg="white")
-        self.root.title("Poznavacka")
-        self.root.geometry(str(width) + "x" + str(height))
 
-        # 🧱 Kontejner pro vrstvení frame-ů
-        container = tk.Frame(self.root)
-        container.pack(fill="both", expand=True)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
+        # container for switching visible frames
+        self.container = tk.Frame(self.root)
 
-        # Všechny frame-y musí mít stejný parent: `container`
-        self.menu_frame = tk.Frame(container)
-        self.quiz_frame = tk.Frame(container)
-        self.summary_frame = tk.Frame(container)
+        # main application frames
+        self.menu_frame = tk.Frame(self.container)
+        self.quiz_frame = tk.Frame(self.container)
+        self.summary_frame = tk.Frame(self.container)
 
-        for frame in (self.menu_frame, self.quiz_frame, self.summary_frame):
-            frame.grid(row=0, column=0, sticky="nsew")
-
-        ### -- MAIN PART-- ###
-        buttons_frame = tk.Frame(self.menu_frame, bg="green")
-        buttons_frame.pack(pady=80)
-        quiz_button = tk.Button(buttons_frame, text="Start Quiz", bg="lightgreen", font=("Arial", 20),
-                                command=lambda: self.fill_image_frame(), height=10, width=20)
-        quiz_button.grid(row=0, column=1)
-
-        # 🟩 Tlačítko
-        load_button = tk.Button(buttons_frame, text="Load Plants", bg="light goldenrod", font=("Arial", 20),
-                           command=lambda: get_files(self.plant_provider), height=10, width=20)
-        load_button.grid(row=1, column=1)
-
-        # 🟩 Tlačítko
-        delete_button = tk.Button(buttons_frame, text="Show All", bg="lightcoral", font=("Arial", 20),
-                                  command=self.show_plants,
-                                  height=10, width=20)
-        delete_button.grid(row=2, column=1)
-
-        ### -- MAIN PART-- ###
-
-        ### --QUIZ PART-- ###
-        back_frame = tk.Frame(self.quiz_frame, bg="white")
-        back_frame.pack()
-        self.go_back_quiz_button = tk.Button(back_frame, text="Back to Menu", bg="light goldenrod",
-                                        font=("Arial", 12),
-                                        command=self.return_to_menu)
-        self.go_back_quiz_button.pack()
-        # 📦 Horní frame na obrázky
+        # image frame
         self.image_frame = tk.Frame(self.quiz_frame, bg="PaleTurquoise1")
-        self.image_frame.pack(pady=20)
 
-        # 📦 Spodní frame na vstup a tlačítko
+        # frame for answers and questions
         bottom_frame = tk.Frame(self.quiz_frame, bg="white")
         bottom_frame.pack(pady=30)
-
-        # 🔴 Textové pole (Entry)
         self.entry = tk.Entry(bottom_frame, width=30, font=("Arial", 14))
-        self.entry.grid(row=0, column=0, padx=10)
 
-        # 🟩 Tlačítko
+        # buttons
         self.confirm_button = tk.Button(bottom_frame, text="Confirm", bg="lightgreen", font=("Arial", 12), command=self.evaluate_answer)
-        self.confirm_button.grid(row=0, column=1, padx=10)
 
-        # 🟩 Tlačítko
         self.next_button = tk.Button(bottom_frame, text="Next Plant", bg="PaleTurquoise1", font=("Arial", 12),
                                         command=self.fill_image_frame)
-        self.next_button.grid(row=0, column=2, padx=10)
 
+        # labels
         self.label_correct = tk.Label(bottom_frame, text="", font=("Arial", 12), bg="white")
-        self.label_correct.grid(row=0, column=3, padx=10)
         self.label_first_correct = tk.Label(bottom_frame, text="", font=("Arial", 12), bg="white")
-        self.label_first_correct.grid(row=0, column=4, padx=10)
         self.label_second_correct = tk.Label(bottom_frame, text="", font=("Arial", 12), bg="white")
-        self.label_second_correct.grid(row=0, column=5, padx=10)
         self.label_incorrect = tk.Label(bottom_frame, text="", font=("Arial", 12), bg="white")
-        self.label_incorrect.grid(row=0, column=6, padx=10)
-
-
         self.label_result = tk.Label(bottom_frame, text="", font=("Arial", 14), bg="white")
-        self.label_result.grid(row=1, column=0, padx=10)
 
-        ### --QUIZ PART-- ###
+        self.create_base_ui_structure()
+
+        self.tree = ttk.Treeview(self.summary_frame, columns=("name", "number of photos", "correct", "correct genus", "correct species", "incorrect"), show="headings")
+
         self.menu_frame.tkraise()
+
+
     def evaluate_answer(self):
         self.confirm_button.config(state="disabled")
         result = AnswerChecker.checkAnswer(self.entry.get(), self.plant_provider.current_plant)
@@ -140,17 +148,15 @@ class UIManager:
         self.label_second_correct.config(text="Correct Species: " + str(self.plant_provider.current_plant.answers.count(Answer.SECOND_CORRECT)))
         self.label_incorrect.config(text="Incorrect Answers: " + str(self.plant_provider.current_plant.answers.count(Answer.INCORRECT)))
 
-
     def get_image_size(self):
         return self.image_frame_width, self.image_frame_height
 
-    def get_image_frame(self):
-        return self.image_frame
     def get_root(self):
         return self.root
 
     def fill_image_frame(self):
 
+        # reset all old data
         self.label_incorrect.config(text="")
         self.label_first_correct.config(text="")
         self.label_second_correct.config(text="")
@@ -161,45 +167,50 @@ class UIManager:
         self.image_frame.config(bg="PaleTurquoise1")
         self.entry.delete(0, tk.END)
         self.quiz_frame.tkraise()
-        self.plant_provider.choose_new_plant()
-        image_paths = [os.path.join(PICTURES_DIR, path) for path in self.plant_provider.current_plant.pick_random_images()]
-        print(image_paths)
+
         self.images = []
         self.image_labels = []
         for widget in self.image_frame.winfo_children():
             widget.destroy()
 
+        # Choose new plant and random pictures
+        self.plant_provider.choose_new_plant()
+        image_paths = [os.path.join(PICTURES_DIR, path) for path in self.plant_provider.current_plant.pick_random_images()]
+
+        # Loads and shows chosen pictures
         for i in range(len(image_paths)):
-            # Načti a zmenši obrázek
             image = Image.open(image_paths[i])
             image_width, image_height = image.size
             image_ratio = image_width / image_height
+
+            # resize the picture
             image_frame_width, image_frame_height = self.get_image_size()
             image = image.resize((int(image_frame_height * image_ratio), int(image_frame_height)))
 
             photo = ImageTk.PhotoImage(image)
-            self.images.append(photo)  # uchovej referenci
+            self.images.append(photo)
 
-            # Rámeček + label s obrázkem
+
             frame = tk.Frame(self.image_frame, width=image_frame_width, height=image_frame_height, bg="orange", bd=2,
                              relief="solid")
             frame.grid(row=i // 2, column=i % 2, padx=20, pady=20)
-
             label = tk.Label(frame, image=photo)
             label.pack()
             self.image_labels.append(label)
 
     def show_plants(self):
 
-        self.go_back_button = tk.Button(self.summary_frame, text="Back to Menu", bg="light goldenrod", font=("Arial", 12),
+        go_back_button = tk.Button(self.summary_frame, text="Back to Menu", bg="light goldenrod", font=("Arial", 12),
                                         command=self.return_to_menu)
-        self.go_back_button.pack()
+        go_back_button.pack()
+
 
         self.summary_frame.tkraise()
-        self.tree = ttk.Treeview(self.summary_frame, columns=("name", "number of photos", "correct", "correct genus", "correct species", "incorrect"), show="headings")
+        self.tree = ttk.Treeview(self.summary_frame, columns=(
+        "name", "number of photos", "correct", "correct genus", "correct species", "incorrect"), show="headings")
         self.tree.pack(fill="both", expand=True)
 
-        # Hlavičky sloupců
+        # define headers
         self.tree.heading("name", text="Name")
         self.tree.heading("number of photos", text="Number of photos")
         self.tree.heading("correct", text="Correct")
@@ -207,7 +218,7 @@ class UIManager:
         self.tree.heading("correct species", text="Correct Species")
         self.tree.heading("incorrect", text="Incorrect")
 
-        # Naplnění tabulky
+        # fill the table
         for plant in self.plant_provider.plant_list:
             name = plant.name
             number_of_photos = len(plant.images)
@@ -226,12 +237,11 @@ class UIManager:
             values = self.tree.item(item_id, "values")
             plant_name = values[0]
 
-            # Smazat z modelu
-
+            # delete from database
             self.plant_provider.plant_list = [p for p in self.plant_provider.plant_list if p.name != plant_name]
             save_plant_objects(self.plant_provider.plant_list)
 
-            # Smazat z tabulky
+            # delete from table
             self.tree.delete(item_id)
 
     def return_to_menu(self):

@@ -1,5 +1,7 @@
 import random
 
+from screeninfo import get_monitors
+
 from plant import Plant, Answer
 import re
 
@@ -47,3 +49,10 @@ class PlantProvider:
     def choose_new_plant(self):
         self.current_plant = random.choice(self.plant_list)
 
+
+# Find main screen resolution
+def find_screen_native():
+    for monitor in get_monitors():
+        if monitor.is_primary:
+            return monitor.width, monitor.height
+    return 1920, 1080
